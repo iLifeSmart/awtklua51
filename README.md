@@ -4,7 +4,7 @@ fork from awtk-lua [https://github.com/zlgopen/awtk-lua]
 
 first build awtk  
 
-https://github.com/zlgopen/awtk
+[https://github.com/zlgopen/awtk]
 
 cd awtk
 scons
@@ -12,7 +12,8 @@ scons
 cd ../awtklua51
 scons
 
-#on macos
+on MacOSX
+
 cp bin/libopenawtk.dylib openawtk.so
 
 export DYLD_LIBRARY_PATH=../awtk/bin/
@@ -21,7 +22,7 @@ run:
 
 luajit
 
---lua code for init
+```
 require'openawtk'
 
 LCD_W=480
@@ -46,4 +47,4 @@ application_init()
 
 Global.run()
 
-
+```
