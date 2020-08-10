@@ -117,6 +117,12 @@
 #include "tkc/idle_info.h"
 #include "combo_box_ex/combo_box_ex.h"
 
+//hack by hantianheng
+#include "guage_time_clock/guage_hour_pointer.h"
+#include "guage_time_clock/guage_minute_pointer.h"
+#include "guage_time_clock/guage_second_pointer.h"
+/***************************/
+
 #include "custom.c"
 
 static int wrap_event_t_get_prop(lua_State* L);
@@ -343,6 +349,16 @@ static int wrap_dialog_t_get_prop(lua_State* L);
 static int wrap_dialog_t_set_prop(lua_State* L);
 static int wrap_combo_box_ex_t_get_prop(lua_State* L);
 static int wrap_combo_box_ex_t_set_prop(lua_State* L);
+//hack by hantianheng
+static int wrap_guage_hour_pointer_t_get_prop(lua_State* L);
+static int wrap_guage_hour_pointer_t_set_prop(lua_State* L);
+
+static int wrap_guage_minute_pointer_t_get_prop(lua_State* L);
+static int wrap_guage_minute_pointer_t_set_prop(lua_State* L);
+
+static int wrap_guage_second_pointer_t_get_prop(lua_State* L);
+static int wrap_guage_second_pointer_t_set_prop(lua_State* L);
+/***************************/
 
 static void globals_init(lua_State* L) {
   lua_pushcfunction(L, to_str);
@@ -8831,6 +8847,262 @@ static void guage_t_init(lua_State* L) {
   luaL_openlib(L, "Guage", static_funcs, 0);
   lua_settop(L, 0);
 }
+
+//hack by hantianheng
+//Hour Poniter
+static int wrap_guage_hour_pointer_create(lua_State* L) {
+  widget_t* ret = NULL;
+  widget_t* parent = (widget_t*)tk_checkudata(L, 1, "widget_t");
+  xy_t x = (xy_t)luaL_checkinteger(L, 2);
+  xy_t y = (xy_t)luaL_checkinteger(L, 3);
+  wh_t w = (wh_t)luaL_checkinteger(L, 4);
+  wh_t h = (wh_t)luaL_checkinteger(L, 5);
+  ret = (widget_t*)guage_hour_pointer_create(parent, x, y, w, h);
+
+  return tk_newuserdata(L, (void*)ret, "/guage_hour_pointer_t/widget_t", "awtk.guage_hour_pointer_t");
+}
+
+static int wrap_guage_hour_pointer_cast(lua_State* L) {
+  widget_t* ret = NULL;
+  widget_t* widget = (widget_t*)tk_checkudata(L, 1, "widget_t");
+  ret = (widget_t*)guage_hour_pointer_cast(widget);
+
+  return tk_newuserdata(L, (void*)ret, "/guage_hour_pointer_t/widget_t", "awtk.guage_hour_pointer_t");
+}
+
+
+static int wrap_guage_hour_pointer_set_image(lua_State* L) {
+  ret_t ret = 0;
+  widget_t* widget = (widget_t*)tk_checkudata(L, 1, "widget_t");
+  char* name = (char*)luaL_checkstring(L, 2);
+  ret = (ret_t)guage_hour_pointer_set_image(widget, name);
+
+  lua_pushnumber(L, (lua_Number)(ret));
+
+  return 1;
+}
+
+static const struct luaL_Reg guage_hour_pointer_t_member_funcs[] = {
+    {"set_image", wrap_guage_hour_pointer_set_image},{NULL, NULL}};
+
+static int wrap_guage_hour_pointer_t_set_prop(lua_State* L){
+  guage_hour_pointer_t* obj = (guage_hour_pointer_t*)tk_checkudata(L, 1, "guage_hour_pointer_t");
+  const char* name = (const char*)luaL_checkstring(L, 2);
+  (void)obj;
+  (void)name;
+  return wrap_widget_t_set_prop(L);
+
+}
+
+static int wrap_guage_hour_pointer_t_get_prop(lua_State* L){
+  guage_hour_pointer_t* obj = (guage_hour_pointer_t*)tk_checkudata(L, 1, "guage_hour_pointer_t");
+  const char* name = (const char*)luaL_checkstring(L, 2);
+  const luaL_Reg* ret = find_member(guage_hour_pointer_t_member_funcs, name);
+
+  (void)obj;
+  (void)name;
+  if (ret) {
+    lua_pushcfunction(L, ret->func);
+    return 1;
+  }
+  if (strcmp(name, "image") == 0) {
+    lua_pushstring(L, (char*)(obj->image.str));
+
+    return 1;
+  } else if (strcmp(name, "hour") == 0) {
+    lua_pushnumber(L, (lua_Number)(obj->hour));
+    return 1;
+  } else {
+    return wrap_widget_t_get_prop(L);
+  }
+}
+
+static void guage_hour_pointer_t_init(lua_State* L) {
+  static const struct luaL_Reg static_funcs[] = {
+      {"create", wrap_guage_hour_pointer_create}, {"cast", wrap_guage_hour_pointer_cast}, {NULL, NULL}};
+
+  static const struct luaL_Reg index_funcs[] = {
+      {"__index", wrap_guage_hour_pointer_t_get_prop}, {"__newindex", wrap_guage_hour_pointer_t_set_prop}, {NULL, NULL}};
+
+  luaL_newmetatable(L, "awtk.guage_hour_pointer_t");
+  lua_pushstring(L, "__index");
+  lua_pushvalue(L, -2);
+  lua_settable(L, -3);
+  luaL_openlib(L, NULL, index_funcs, 0);
+  luaL_openlib(L, "GuageHourPointer", static_funcs, 0);
+  lua_settop(L, 0);
+}
+/***********  Minute ************/
+
+static int wrap_guage_minute_pointer_create(lua_State* L) {
+  widget_t* ret = NULL;
+  widget_t* parent = (widget_t*)tk_checkudata(L, 1, "widget_t");
+  xy_t x = (xy_t)luaL_checkinteger(L, 2);
+  xy_t y = (xy_t)luaL_checkinteger(L, 3);
+  wh_t w = (wh_t)luaL_checkinteger(L, 4);
+  wh_t h = (wh_t)luaL_checkinteger(L, 5);
+  ret = (widget_t*)guage_minute_pointer_create(parent, x, y, w, h);
+
+  return tk_newuserdata(L, (void*)ret, "/guage_minute_pointer_t/widget_t", "awtk.guage_minute_pointer_t");
+}
+
+static int wrap_guage_minute_pointer_cast(lua_State* L) {
+  widget_t* ret = NULL;
+  widget_t* widget = (widget_t*)tk_checkudata(L, 1, "widget_t");
+  ret = (widget_t*)guage_minute_pointer_cast(widget);
+
+  return tk_newuserdata(L, (void*)ret, "/guage_minute_pointer_t/widget_t", "awtk.guage_minute_pointer_t");
+}
+
+
+static int wrap_guage_minute_pointer_set_image(lua_State* L) {
+  ret_t ret = 0;
+  widget_t* widget = (widget_t*)tk_checkudata(L, 1, "widget_t");
+  char* name = (char*)luaL_checkstring(L, 2);
+  ret = (ret_t)guage_minute_pointer_set_image(widget, name);
+
+  lua_pushnumber(L, (lua_Number)(ret));
+
+  return 1;
+}
+
+static const struct luaL_Reg guage_minute_pointer_t_member_funcs[] = {
+    {"set_image", wrap_guage_minute_pointer_set_image},{NULL, NULL}};
+
+static int wrap_guage_minute_pointer_t_set_prop(lua_State* L){
+  guage_minute_pointer_t* obj = (guage_minute_pointer_t*)tk_checkudata(L, 1, "guage_minute_pointer_t");
+  const char* name = (const char*)luaL_checkstring(L, 2);
+  (void)obj;
+  (void)name;
+  return wrap_widget_t_set_prop(L);
+
+}
+
+static int wrap_guage_minute_pointer_t_get_prop(lua_State* L){
+  guage_minute_pointer_t* obj = (guage_minute_pointer_t*)tk_checkudata(L, 1, "guage_minute_pointer_t");
+  const char* name = (const char*)luaL_checkstring(L, 2);
+  const luaL_Reg* ret = find_member(guage_minute_pointer_t_member_funcs, name);
+
+  (void)obj;
+  (void)name;
+  if (ret) {
+    lua_pushcfunction(L, ret->func);
+    return 1;
+  }
+  if (strcmp(name, "image") == 0) {
+    lua_pushstring(L, (char*)(obj->image.str));
+
+    return 1;
+  } else if (strcmp(name, "minute") == 0) {
+    lua_pushnumber(L, (lua_Number)(obj->minute));
+    return 1;
+  } else {
+    return wrap_widget_t_get_prop(L);
+  }
+}
+
+static void guage_minute_pointer_t_init(lua_State* L) {
+  static const struct luaL_Reg static_funcs[] = {
+      {"create", wrap_guage_minute_pointer_create}, {"cast", wrap_guage_minute_pointer_cast}, {NULL, NULL}};
+
+  static const struct luaL_Reg index_funcs[] = {
+      {"__index", wrap_guage_minute_pointer_t_get_prop}, {"__newindex", wrap_guage_minute_pointer_t_set_prop}, {NULL, NULL}};
+
+  luaL_newmetatable(L, "awtk.guage_minute_pointer_t");
+  lua_pushstring(L, "__index");
+  lua_pushvalue(L, -2);
+  lua_settable(L, -3);
+  luaL_openlib(L, NULL, index_funcs, 0);
+  luaL_openlib(L, "GuageMinutePointer", static_funcs, 0);
+  lua_settop(L, 0);
+}
+
+/***********  Second ************/
+
+static int wrap_guage_second_pointer_create(lua_State* L) {
+  widget_t* ret = NULL;
+  widget_t* parent = (widget_t*)tk_checkudata(L, 1, "widget_t");
+  xy_t x = (xy_t)luaL_checkinteger(L, 2);
+  xy_t y = (xy_t)luaL_checkinteger(L, 3);
+  wh_t w = (wh_t)luaL_checkinteger(L, 4);
+  wh_t h = (wh_t)luaL_checkinteger(L, 5);
+  ret = (widget_t*)guage_second_pointer_create(parent, x, y, w, h);
+
+  return tk_newuserdata(L, (void*)ret, "/guage_second_pointer_t/widget_t", "awtk.guage_second_pointer_t");
+}
+
+static int wrap_guage_second_pointer_cast(lua_State* L) {
+  widget_t* ret = NULL;
+  widget_t* widget = (widget_t*)tk_checkudata(L, 1, "widget_t");
+  ret = (widget_t*)guage_second_pointer_cast(widget);
+
+  return tk_newuserdata(L, (void*)ret, "/guage_second_pointer_t/widget_t", "awtk.guage_second_pointer_t");
+}
+
+
+static int wrap_guage_second_pointer_set_image(lua_State* L) {
+  ret_t ret = 0;
+  widget_t* widget = (widget_t*)tk_checkudata(L, 1, "widget_t");
+  char* name = (char*)luaL_checkstring(L, 2);
+  ret = (ret_t)guage_second_pointer_set_image(widget, name);
+
+  lua_pushnumber(L, (lua_Number)(ret));
+
+  return 1;
+}
+
+static const struct luaL_Reg guage_second_pointer_t_member_funcs[] = {
+    {"set_image", wrap_guage_second_pointer_set_image},{NULL, NULL}};
+
+static int wrap_guage_second_pointer_t_set_prop(lua_State* L){
+  guage_second_pointer_t* obj = (guage_second_pointer_t*)tk_checkudata(L, 1, "guage_second_pointer_t");
+  const char* name = (const char*)luaL_checkstring(L, 2);
+  (void)obj;
+  (void)name;
+  return wrap_widget_t_set_prop(L);
+
+}
+
+static int wrap_guage_second_pointer_t_get_prop(lua_State* L){
+  guage_second_pointer_t* obj = (guage_second_pointer_t*)tk_checkudata(L, 1, "guage_second_pointer_t");
+  const char* name = (const char*)luaL_checkstring(L, 2);
+  const luaL_Reg* ret = find_member(guage_second_pointer_t_member_funcs, name);
+
+  (void)obj;
+  (void)name;
+  if (ret) {
+    lua_pushcfunction(L, ret->func);
+    return 1;
+  }
+  if (strcmp(name, "image") == 0) {
+    lua_pushstring(L, (char*)(obj->image.str));
+
+    return 1;
+  } else if (strcmp(name, "second") == 0) {
+    lua_pushnumber(L, (lua_Number)(obj->second));
+    return 1;
+  } else {
+    return wrap_widget_t_get_prop(L);
+  }
+}
+
+static void guage_second_pointer_t_init(lua_State* L) {
+  static const struct luaL_Reg static_funcs[] = {
+      {"create", wrap_guage_second_pointer_create}, {"cast", wrap_guage_second_pointer_cast}, {NULL, NULL}};
+
+  static const struct luaL_Reg index_funcs[] = {
+      {"__index", wrap_guage_second_pointer_t_get_prop}, {"__newindex", wrap_guage_second_pointer_t_set_prop}, {NULL, NULL}};
+
+  luaL_newmetatable(L, "awtk.guage_second_pointer_t");
+  lua_pushstring(L, "__index");
+  lua_pushvalue(L, -2);
+  lua_settable(L, -3);
+  luaL_openlib(L, NULL, index_funcs, 0);
+  luaL_openlib(L, "GuageSecondPointer", static_funcs, 0);
+  lua_settop(L, 0);
+}
+
+/********************************/
 static int wrap_prop_change_event_cast(lua_State* L) {
   prop_change_event_t* ret = NULL;
   event_t* event = (event_t*)tk_checkudata(L, 1, "event_t");
