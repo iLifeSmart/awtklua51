@@ -20427,7 +20427,8 @@ static void combo_box_ex_t_init(lua_State* L) {
   lua_settop(L, 0);
 }
 
-int luaL_openawtk(lua_State* L) {
+int awtk_callback_register(lua_State* L);
+int luaopen_openawtk(lua_State* L) {
   globals_init(L);
   event_t_init(L);
   emitter_t_init(L);
