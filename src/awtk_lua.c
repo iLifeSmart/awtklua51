@@ -379,62 +379,16 @@ static int wrap_combo_box_ex_t_set_prop(lua_State* L);
 
 
 //hack by pulleyzzz
-#include <sys/stat.h>
-#include <sys/mman.h>
 
-static ret_t mapfile2mem(const char* filename,uint8_t** pp,uint32_t* psize)
+static ret_t add_ttf_mmap_font(assets_manager_t* am,const char* font_name, const char* filename)
 {
-  int fd;
-  fd = open(filename,O_RDONLY,0);
-  if (fd<0) return RET_FAIL;
-  struct stat s;
-  if (fstat(fd, &s) < 0) {
-      close(fd);
-      return RET_FAIL;
-  }
-  void* p=mmap(NULL,s.st_size,PROT_READ,MAP_SHARED,fd,0);
-  close(fd);
-  if (!p) return RET_FAIL;
-  *pp=p;
-  *psize=s.st_size;
-}
-
-static ret_t add_ttf_mmap_font(assets_manager_t* am,const char* font_name, const char* filename) {
-  #if 1
-    uint8_t* p;
-    uint32_t size;
-    mapfile2mem(filename,&p,&size);
-    asset_info_t* info = asset_info_create(ASSET_TYPE_FONT, ASSET_TYPE_FONT_TTF, 
-      font_name, sizeof(uint8_t*)*2);
-  return_value_if_fail(info != NULL, RET_FAIL);
-
-  ((uint8_t**)info->data)[0]=p;
-  ((uint8_t**)info->data)[1]=size;
-  #else
-#if 0
-  int fd;
-   fd = open(filename,O_RDONLY,0);
-  if (fd<0) return RET_FAIL;
-  struct stat s;
-  if (fstat(fd, &s) < 0) {
-      close(fd);
-      return RET_FAIL;
-  }
-    asset_info_t* info = asset_info_create(ASSET_TYPE_FONT, ASSET_TYPE_FONT_TTF, 
-      font_name, s.st_size);
-  return_value_if_fail(info != NULL, RET_FAIL);
-
-  read(fd,info->data, s.st_size);
-  close(fd);
-#else
-  asset_info_t* info = asset_info_create(ASSET_TYPE_FONT, ASSET_TYPE_FONT_TTF, 
-      font_name, strlen(filename) + 1);
-  return_value_if_fail(info != NULL, RET_FAIL);
-
-  strcpy((char*)(info->data), filename);
-#endif
-#endif
-  return assets_manager_add(am, info);
+	asset_info_t* info=asset_loader_load(am->loader, ASSET_TYPE_FONT, ASSET_TYPE_FONT_TTF, filename, font_name);
+	return_value_if_fail(info != NULL, NULL);
+	if (info->map)
+	{
+		printf("add ttf mmap font %s[%s], size=%d, data=%p\n",font_name,filename,info->map->size,info->map->data);
+	}
+	return assets_manager_add(am, info);
 }
 
 //hack by pulleyzzz
@@ -456,6 +410,18 @@ static int wrap_assets_manager_add_ttf_mmap_font(lua_State* L) {
   const char* fontname = (const char*)luaL_checkstring(L, 2);
   const char* filename = (const char*)luaL_checkstring(L, 3);
   ret = (ret_t)add_ttf_mmap_font(am,fontname,filename);
+
+  lua_pushnumber(L, (lua_Number)(ret));
+
+  return 1;
+}
+extern ret_t ls_add_font_find_list(int idx, const char* name);
+static int wrap_assets_manager_add_font_find_list(lua_State* L) {
+  ret_t ret = 0;
+  assets_manager_t* am = (assets_manager_t*)tk_checkudata(L, 1, "assets_manager_t");
+  int idx = (const char*)luaL_checkinteger(L, 2);
+  const char* fontname = (const char*)luaL_checkstring(L, 3);
+  ret = (ret_t)ls_add_font_find_list(idx,fontname);
 
   lua_pushnumber(L, (lua_Number)(ret));
 
@@ -10470,6 +10436,7 @@ static const struct luaL_Reg assets_manager_t_member_funcs[] = {
     {"set_theme", wrap_assets_manager_set_theme},
     {"preload", wrap_assets_manager_preload},//hack by pulleyzzz
     {"add_ttf_mmap_font", wrap_assets_manager_add_ttf_mmap_font},//hack by pulleyzzz
+    {"add_font_find_list", wrap_assets_manager_add_font_find_list},//hack by pulleyzzz
     {"ref", wrap_assets_manager_ref},
     {"ref_ex", wrap_assets_manager_ref_ex},
     {"unref", wrap_assets_manager_unref},
