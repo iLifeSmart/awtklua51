@@ -383,7 +383,7 @@ static int wrap_combo_box_ex_t_set_prop(lua_State* L);
 static ret_t add_ttf_mmap_font(assets_manager_t* am,const char* font_name, const char* filename)
 {
 	asset_info_t* info=asset_loader_load(am->loader, ASSET_TYPE_FONT, ASSET_TYPE_FONT_TTF, filename, font_name);
-	return_value_if_fail(info != NULL, NULL);
+	return_value_if_fail(info != NULL, RET_FAIL);
 	if (info->map)
 	{
 		printf("add ttf mmap font %s[%s], size=%d, data=%p\n",font_name,filename,info->map->size,info->map->data);
@@ -478,7 +478,7 @@ static int wrap_widget_off_by_tag(lua_State* L) {
 static ret_t slide_view_on_scroll_done(void* ctx, event_t* e) {
   widget_t* widget = WIDGET(ctx);
   slide_view_t* slide_view = SLIDE_VIEW(ctx);
-  return_value_if_fail(widget != NULL && slide_view != NULL, RET_BAD_PARAMS);
+  return_value_if_fail(widget != NULL && slide_view != NULL, RET_FAIL);
 
   if (slide_view->xoffset > 0 || slide_view->yoffset > 0) {
     slide_view_activate_prev(slide_view);
@@ -537,7 +537,7 @@ static int wrap_slide_view_set_active_anim(lua_State* L) {
 static widget_t* ui_loader_load_widget_xml(const char* name,const uint8_t* content,size_t size) {
   ui_loader_t* loader = xml_ui_loader();
   ui_builder_t* builder = ui_builder_default(name);
-  return_value_if_fail(content != NULL, NULL);
+  return_value_if_fail(content != NULL, RET_FAIL);
 
   ui_loader_load(loader, content, size, builder);
 
