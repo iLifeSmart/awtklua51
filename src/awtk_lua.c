@@ -459,6 +459,15 @@ static int wrap_widget_measure_text(lua_State* L) {
   return 1;
 }
 
+//hack by hantianheng
+static int wrap_widget_set_need_update_style(lua_State* L){
+  ret_t ret = 0;
+  widget_t* widget = (widget_t*)tk_checkudata(L, 1, "widget_t");
+  ret = (ret_t)widget_set_need_update_style(widget);
+  lua_pushnumber(L, (lua_Number)(ret));
+  return 1;
+}
+
 //hack by pulleyzzz
 static int wrap_widget_off_by_tag(lua_State* L) {
   ret_t ret = 0;
@@ -8572,6 +8581,7 @@ static const struct luaL_Reg widget_t_member_funcs[] = {
     {"set_style_color", wrap_widget_set_style_color},
     {"get_theme", wrap_widget_get_theme},   //hack by pulleyzzz
     {"measure_text", wrap_widget_measure_text},   //hack by pulleyzzz
+    {"set_need_update_style", wrap_widget_set_need_update_style}, //hack by hantianheng
     {NULL, NULL}};
 
 static int wrap_widget_t_set_prop(lua_State* L) {
