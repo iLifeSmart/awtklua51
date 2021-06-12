@@ -377,9 +377,7 @@ static int wrap_system_bar_t_set_prop(lua_State* L);
 static int wrap_combo_box_ex_t_get_prop(lua_State* L);
 static int wrap_combo_box_ex_t_set_prop(lua_State* L);
 
-
 //hack by pulleyzzz
-
 static ret_t add_ttf_mmap_font(assets_manager_t* am,const char* font_name, const char* filename)
 {
 	asset_info_t* info=asset_loader_load(am->loader, ASSET_TYPE_FONT, ASSET_TYPE_FONT_TTF, filename, font_name);
@@ -415,6 +413,7 @@ static int wrap_assets_manager_add_ttf_mmap_font(lua_State* L) {
 
   return 1;
 }
+
 extern ret_t ls_add_font_find_list(int idx, const char* name);
 static int wrap_assets_manager_add_font_find_list(lua_State* L) {
   ret_t ret = 0;
@@ -545,7 +544,7 @@ static int wrap_slide_view_set_active_anim(lua_State* L) {
 #include "ui_loader/ui_builder_default.h"
 static widget_t* ui_loader_load_widget_xml(const char* name,const uint8_t* content,size_t size) {
   ui_loader_t* loader = xml_ui_loader();
-  ui_builder_t* builder = ui_builder_default(name);
+  ui_builder_t* builder = ui_builder_default_create(name);
   return_value_if_fail(content != NULL, RET_FAIL);
 
   ui_loader_load(loader, content, size, builder);
@@ -977,10 +976,6 @@ static void guage_second_pointer_t_init(lua_State* L) {
 }
 
 /********************************/
-
-
-
-
 static void globals_init(lua_State* L) {
   lua_pushcfunction(L, to_str);
   lua_setglobal(L, "to_str");
@@ -4864,9 +4859,21 @@ static int wrap_locale_info_off(lua_State* L) {
   return 1;
 }
 
+//hack by hantianheng
+static int wrap_locale_info_reload(lua_State* L)
+{
+  ret_t ret = 0;
+  locale_info_t* locale_info = (locale_info_t*)tk_checkudata(L, 1, "locale_info_t");
+  ret = locale_info_reload(locale_info);
+  lua_pushnumber(L, (lua_Number)(ret));
+  log_debug("wrap_locale_info_reload\n");
+  return 1;
+}
+
 static const struct luaL_Reg locale_info_t_member_funcs[] = {{"tr", wrap_locale_info_tr},
                                                              {"change", wrap_locale_info_change},
                                                              {"off", wrap_locale_info_off},
+                                                             {"reload",wrap_locale_info_reload},//hack by hantianheng
                                                              {NULL, NULL}};
 
 static int wrap_locale_info_t_set_prop(lua_State* L) {
@@ -4888,7 +4895,7 @@ static int wrap_locale_info_t_get_prop(lua_State* L) {
   if (ret) {
     lua_pushcfunction(L, ret->func);
     return 1;
-  } else {
+  }else {
     log_debug("%s: not supported %s\n", __FUNCTION__, name);
     return 0;
   }
@@ -8329,6 +8336,18 @@ static int wrap_widget_dispatch_to_key_target(lua_State* L) {
   return 1;
 }
 
+//hack by hantianheng
+static int wrap_widget_dispatch(lua_State* L) {
+  ret_t ret = 0;
+  widget_t* widget = (widget_t*)tk_checkudata(L, 1, "widget_t");
+  event_t* e = (event_t*)tk_checkudata(L, 2, "event_t");
+  ret = (ret_t)widget_dispatch(widget, e);
+
+  lua_pushnumber(L, (lua_Number)(ret));
+
+  return 1;
+}
+
 static int wrap_widget_get_style_type(lua_State* L) {
   const char* ret = NULL;
   widget_t* widget = (widget_t*)tk_checkudata(L, 1, "widget_t");
@@ -8584,6 +8603,7 @@ static const struct luaL_Reg widget_t_member_funcs[] = {
     {"fill_fg_rect", wrap_widget_fill_fg_rect},
     {"dispatch_to_target", wrap_widget_dispatch_to_target},
     {"dispatch_to_key_target", wrap_widget_dispatch_to_key_target},
+    {"dispatch",wrap_widget_dispatch},//hack by hantianheng
     {"get_style_type", wrap_widget_get_style_type},
     {"update_style", wrap_widget_update_style},
     {"update_style_recursive", wrap_widget_update_style_recursive},
@@ -20231,7 +20251,6 @@ static int wrap_combo_box_append_option(lua_State* L) {
   ret = (ret_t)combo_box_append_option(widget, value, text);
 
   lua_pushnumber(L, (lua_Number)(ret));
-
   return 1;
 }
 
@@ -20960,9 +20979,9 @@ int luaopen_openawtk(lua_State* L) {
   combo_box_ex_t_init(L);
 
   //hack by hantianheng
-    guage_second_pointer_t_init(L);
-    guage_minute_pointer_t_init(L);
-    guage_hour_pointer_t_init(L);
+  guage_second_pointer_t_init(L);
+  guage_minute_pointer_t_init(L);
+  guage_hour_pointer_t_init(L);
   /**********************/
   //s_current_L = L;
   return 0;
