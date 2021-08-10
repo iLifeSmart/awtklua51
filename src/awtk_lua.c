@@ -423,7 +423,7 @@ extern ret_t ls_add_font_find_list(int idx, const char* name);
 static int wrap_assets_manager_add_font_find_list(lua_State* L) {
   ret_t ret = 0;
   assets_manager_t* am = (assets_manager_t*)tk_checkudata(L, 1, "assets_manager_t");
-  int idx = (const char*)luaL_checkinteger(L, 2);
+  int idx = luaL_checkinteger(L, 2);
   const char* fontname = (const char*)luaL_checkstring(L, 3);
   ret = (ret_t)ls_add_font_find_list(idx,fontname);
 
@@ -550,7 +550,7 @@ static int wrap_slide_view_set_active_anim(lua_State* L) {
 static widget_t* ui_loader_load_widget_xml(const char* name,const uint8_t* content,size_t size) {
   ui_loader_t* loader = xml_ui_loader();
   ui_builder_t* builder = ui_builder_default_create(name);
-  return_value_if_fail(content != NULL, RET_FAIL);
+  return_value_if_fail(content != NULL, NULL);
 
   ui_loader_load(loader, content, size, builder);
 
