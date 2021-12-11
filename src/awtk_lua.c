@@ -128,6 +128,12 @@
 #include "guage_time_clock/guage_second_pointer.h"
 
 //hack by hantianheng
+//#define INCLUDE_RIVE
+#if (defined INCLUDE_RIVE)
+#include "rive/rive.h"
+#endif
+
+//hack by hantianheng
 static int wrap_guage_hour_pointer_t_get_prop(lua_State* L);
 static int wrap_guage_hour_pointer_t_set_prop(lua_State* L);
 
@@ -136,8 +142,6 @@ static int wrap_guage_minute_pointer_t_set_prop(lua_State* L);
 
 static int wrap_guage_second_pointer_t_get_prop(lua_State* L);
 static int wrap_guage_second_pointer_t_set_prop(lua_State* L);
-/***************************/
-
 /***************************/
 
 #include "custom.c"
@@ -423,7 +427,7 @@ static int wrap_assets_manager_add_ttf_mmap_font(lua_State* L) {
 extern ret_t ls_add_font_find_list(int idx, const char* name);
 static int wrap_assets_manager_add_font_find_list(lua_State* L) {
   ret_t ret = 0;
-  assets_manager_t* am = (assets_manager_t*)tk_checkudata(L, 1, "assets_manager_t");
+  // assets_manager_t* am = (assets_manager_t*)tk_checkudata(L, 1, "assets_manager_t");
   int idx = luaL_checkinteger(L, 2);
   const char* fontname = (const char*)luaL_checkstring(L, 3);
   ret = (ret_t)ls_add_font_find_list(idx,fontname);
@@ -668,7 +672,6 @@ static const date_time_vtable_t s_date_time_vtable = {
     date_time_get_now_impl, date_time_set_now_impl, date_time_from_time_impl};
 
 static int wrap_tk_set_tmzone(lua_State* L) {
-  ret_t ret = 0;
   date_time_global_init_ex(&s_date_time_vtable);
   s_tmzone = luaL_optinteger(L,1,s_tmzone);
   lua_pushnumber(L, (lua_Number)(s_tmzone));
@@ -981,6 +984,122 @@ static void guage_second_pointer_t_init(lua_State* L) {
   lua_settop(L, 0);
 }
 
+//hack by hantianheng
+/********************* rive *********************/
+#if (defined INCLUDE_RIVE)
+static int wrap_rive_create(lua_State* L) {
+  widget_t* ret = NULL;
+  widget_t* parent = (widget_t*)tk_checkudata(L, 1, "widget_t");
+  xy_t x = (xy_t)luaL_checkinteger(L, 2);
+  xy_t y = (xy_t)luaL_checkinteger(L, 3);
+  wh_t w = (wh_t)luaL_checkinteger(L, 4);
+  wh_t h = (wh_t)luaL_checkinteger(L, 5);
+  ret = (widget_t*)rive_create(parent, x, y, w, h);
+
+  return tk_newuserdata(L, (void*)ret, "/rive_t/widget_t", "awtk.rive_t");
+}
+
+static int wrap_rive_cast(lua_State* L) {
+  widget_t* ret = NULL;
+  widget_t* widget = (widget_t*)tk_checkudata(L, 1, "widget_t");
+  ret = (widget_t*)rive_cast(widget);
+
+  return tk_newuserdata(L, (void*)ret, "/rive_t/widget_t", "awtk.rive_t");
+}
+
+static int wrap_rive_set_url(lua_State* L){
+  ret_t ret = 0;
+  widget_t* widget = (widget_t*)tk_checkudata(L, 1, "widget_t");
+  const char* url = (char *)luaL_checkstring(L,2);
+  ret = rive_set_url(widget,url);
+  lua_pushnumber(L, (lua_Number)(ret));
+  return 1;
+}
+
+static int wrap_rive_stop(lua_State* L){
+  ret_t ret = 0;
+  widget_t* widget = (widget_t*)tk_checkudata(L, 1, "widget_t");
+  ret = rive_stop(widget);
+  lua_pushnumber(L, (lua_Number)(ret));
+  return 1;
+}
+
+static int wrap_rive_pause(lua_State* L){
+  ret_t ret = 0;
+  widget_t* widget = (widget_t*)tk_checkudata(L, 1, "widget_t");
+  ret = rive_pause(widget);
+  lua_pushnumber(L, (lua_Number)(ret));
+  return 1;
+}
+
+
+static int wrap_rive_play(lua_State* L){
+  ret_t ret = 0;
+  widget_t* widget = (widget_t*)tk_checkudata(L, 1, "widget_t");
+  ret = rive_play(widget);
+  lua_pushnumber(L, (lua_Number)(ret));
+  return 1;
+}
+
+static const struct luaL_Reg rive_t_member_funcs[] = {
+    {"play", wrap_rive_play},
+    {"stop", wrap_rive_stop},
+    {"pause",wrap_rive_pause},
+    {"set_url",wrap_rive_set_url},
+    {NULL, NULL}};
+
+static int wrap_rive_t_set_prop(lua_State* L){
+  guage_second_pointer_t* obj = (guage_second_pointer_t*)tk_checkudata(L, 1, "rive_t");
+  const char* name = (const char*)luaL_checkstring(L, 2);
+  (void)obj;
+  (void)name;
+  return wrap_widget_t_set_prop(L);
+}
+
+static int wrap_rive_t_get_prop(lua_State* L){
+  rive_t* obj = (rive_t*)tk_checkudata(L, 1, "rive_t");
+  const char* name = (const char*)luaL_checkstring(L, 2);
+  const luaL_Reg* ret = find_member(rive_t_member_funcs, name);
+
+  (void)obj;
+  (void)name;
+  if (ret) {
+    lua_pushcfunction(L, ret->func);
+    return 1;
+  }
+
+  if (strcmp(name, "url") == 0) {
+    lua_pushstring(L, (char*)(obj->url));
+    return 1;
+  } else if (strcmp(name, "running") == 0) {
+    lua_pushboolean(L, (lua_Integer)(obj->running));
+    return 1;
+  } else if (strcmp(name, "duration") == 0) {
+    lua_pushnumber(L, (lua_Integer)(obj->duration));
+    return 1;
+  }else {
+    return wrap_widget_t_get_prop(L);
+    return 0;
+  }
+}
+
+static void rive_t_init(lua_State* L) {
+  static const struct luaL_Reg static_funcs[] = {
+      {"create", wrap_rive_create}, {"cast", wrap_rive_cast}, {NULL, NULL}};
+
+  static const struct luaL_Reg index_funcs[] = {
+      {"__index", wrap_rive_t_get_prop}, {"__newindex", wrap_rive_t_set_prop}, {NULL, NULL}};
+
+  luaL_newmetatable(L, "awtk.rive_t");
+  lua_pushstring(L, "__index");
+  lua_pushvalue(L, -2);
+  lua_settable(L, -3);
+  luaL_openlib(L, NULL, index_funcs, 0);
+  luaL_openlib(L, "Rive", static_funcs, 0);
+  lua_settop(L, 0);
+}
+#endif
+//hack by hantianheng  rive end
 /********************************/
 static void globals_init(lua_State* L) {
   lua_pushcfunction(L, to_str);
@@ -2739,6 +2858,18 @@ static int wrap_tk_is_pointer_pressed(lua_State* L) {
   return 1;
 }
 
+//hack
+static int wrap_tk_set_lcd_orientation(lua_State* L)
+{
+	int32_t ret = 0;
+	lcd_orientation_t orientation = (lcd_orientation_t)luaL_checkinteger(L, 1);
+	ret = (int32_t)tk_set_lcd_orientation(orientation);
+
+	lua_pushinteger(L, (lua_Integer)(ret));
+
+	return 1;
+}
+
 static void global_t_init(lua_State* L) {
   static const struct luaL_Reg static_funcs[] = {{"init", wrap_tk_init},
                                                  {"set_tmzone", wrap_tk_set_tmzone},//hack by pulleyzzz
@@ -2753,6 +2884,7 @@ static void global_t_init(lua_State* L) {
                                                  {"get_pointer_x", wrap_tk_get_pointer_x},
                                                  {"get_pointer_y", wrap_tk_get_pointer_y},
                                                  {"is_pointer_pressed", wrap_tk_is_pointer_pressed},
+                                                 {"set_lcd_orientation",wrap_tk_set_lcd_orientation},
                                                  {NULL, NULL}};
 
   luaL_openlib(L, "Global", static_funcs, 0);
@@ -7727,7 +7859,7 @@ static int wrap_widget_get_feedback(lua_State* L) {
 }
 
 static int wrap_widget_get_text(lua_State* L) {
-  const wchar_t* ret = NULL;
+  // const wchar_t* ret = NULL;
   widget_t* widget = (widget_t*)tk_checkudata(L, 1, "widget_t");
  
   //hack by pulleyzzz
@@ -21514,6 +21646,9 @@ int luaopen_openawtk(lua_State* L) {
   guage_second_pointer_t_init(L);
   guage_minute_pointer_t_init(L);
   guage_hour_pointer_t_init(L);
+#if (defined INCLUDE_RIVE)
+  rive_t_init(L);
+#endif
   /**********************/
   //s_current_L = L;
   return 0;
